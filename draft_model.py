@@ -81,7 +81,8 @@ def reduce_team_drafts(oracles_data, champ_map):
         # it's own column for significance
         if blank_row["ap"] == 0 or blank_row["ad"] == 0:
             blank_row["no_damage_type"] = 1
-        draft_df = draft_df.append(blank_row, ignore_index=True)
+        
+        draft_df = pd.concat([draft_df, pd.DataFrame.from_dict([blank_row])], ignore_index=True, axis=0, join='outer')
 
     return draft_df
 

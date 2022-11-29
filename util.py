@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
 
 def load_match_data():
     # Original data from https://oracleselixir.com 
@@ -78,7 +79,11 @@ def merge_team_and_draft(match_data, draft_data, n_clusters=7):
                     combined[f'team_comp{i}_v_opp_comp{j}'])
 
     # Cleaning some bad data in the original Oracles dataset
-    bad_games = combined.groupby('gameid').sum()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter(action='ignore', category=FutureWarning)
+        bad_games = combined.groupby('gameid').sum()
+
     list_of_bad_games = []
     for i in list_of_comp_diffs:
         for j in bad_games.index:
@@ -88,6 +93,7 @@ def merge_team_and_draft(match_data, draft_data, n_clusters=7):
         ~combined['gameid'].isin(list_of_bad_games)]
 
     required_columns = ["gameid", "teamname", "opponent", "date", "league", "result",
+    "bot_lead_at_15", "mid_lead_at_15", "top_lead_at_15",
     "side", "elo_diff","draft_agnostic_bot_lead_prob", "draft_agnostic_mid_lead_prob", 
     "draft_agnostic_top_lead_prob", "post_draft_bot_lead_prob",  "post_draft_mid_lead_prob", 
     "post_draft_top_lead_prob"]
@@ -101,41 +107,3 @@ def print_win_prob_model_outputs(match_data):
     columns = ["teamname", "opponent", "result", 
                "draft_agnostic_win_prob", "post_draft_win_prob", "draft_diff"]
     return match_data[columns].head()
-
-def calibration_plot(match_data):
-    match_data['q'] = pd.cut(match_data['post_draft_win_prob'], 20)
-
-    fig, ax = plt.subplots()
-    ax.plot([0, 1], [0, 1], label='perfectly calibrated',
-             linestyle='dashed', color='grey')
-
-    ax.plot(list(match_data.groupby('q').mean()['post_draft_win_prob']),
-             list(match_data.groupby('q').mean()['result']),
-             label='Draft Model')
-    ax.legend()
-
-    ax.set_title("Post draft model calibration plot")
-    ax.set_xlabel("Predicted Win Probability")
-    ax.set_ylabel("True Win Probability in each bin")
-    ax.grid()
-
-def plot_cumulative_expected_wins_added_by_draft(match_data):
-    lec = match_data[match_data['league'] == 'LEC']
-    lec = lec[lec['date'] >= '2022-01-01'] # Most reason whole season
-    lec['gamecount'] = lec.groupby('teamname')['draft_diff'].transform('cumcount')
-    lec['wpa'] = lec.groupby('teamname')['draft_diff'].transform('cumsum')
-    fig, ax = plt.subplots()
-    colour_dict = {'G2 Esports' :'black', 'Fnatic':'orange', 'Misfits Gaming': 'red'}
-    for team in np.unique(lec['teamname']):
-        if team in ['G2 Esports', 'Fnatic', 'Misfits Gaming']:
-            ax.plot(lec[lec['teamname'] == team]['gamecount'],
-                    lec[lec['teamname'] == team]['wpa'],
-                    label=team, linewidth=2, color=colour_dict[team])
-        else:
-            ax.plot(lec[lec['teamname'] == team]['gamecount'],
-                    lec[lec['teamname'] == team]['wpa'],
-                    label=team, color='Grey', alpha=0.4)
-    ax.set_xlabel("Games played (2022 spring and summer split)")
-    ax.set_ylabel("Cumulative expected wins")
-    ax.set_title("LoL European Championship Cumulative Expected Wins Added Through Draft")
-    ax.grid()

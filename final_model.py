@@ -6,9 +6,9 @@ def train_draft_agnostic_model(train_data):
     """Train the draft agnostic model"""
 
     draft_agnostic_lead_prob_model = smf.logit(
-        formula="result ~side + elo_diff + (draft_agnostic_bot_lead_prob + draft_agnostic_mid_lead_prob + draft_agnostic_top_lead_prob) - 1",
+        formula="result ~ side + (draft_agnostic_bot_lead_prob + draft_agnostic_mid_lead_prob + draft_agnostic_top_lead_prob)**2 - 1",
         data=train_data
-    ).fit_regularized(alpha=1)
+    ).fit_regularized(alpha=3)
     return draft_agnostic_lead_prob_model
 
 def train_post_draft_model(train, list_of_comps, match_data):

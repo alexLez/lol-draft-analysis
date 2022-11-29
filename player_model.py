@@ -42,11 +42,11 @@ def fit_win_lane_model(match_data, lane, pos_list, use_draft):
                 if i != j:
                     logit_formula += f" + {i}:{j}"
 
-    train, test = tts(match_data, test_size=0.3, random_state=123)
+    train, test = tts(match_data, test_size=0.3, random_state=0)
 
     lane_lead_prob_model = smf.logit(
         formula=logit_formula, data=train
-    ).fit_regularized(alpha=10, disp=0)
+    ).fit_regularized(alpha=3, disp=0)
 
     name = "post_draft" if use_draft else "draft_agnostic"
 
