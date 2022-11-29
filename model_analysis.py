@@ -168,9 +168,9 @@ def lane_lead_correlations(games):
     ax[1].legend()
     ax[2].legend()
 
-    ax[0].set_title("Bot lane")
-    ax[1].set_title("Mid lane")
-    ax[2].set_title("Top lane")
+    ax[0].set_title("Bot Lane")
+    ax[1].set_title("Mid Lane")
+    ax[2].set_title("Top Lane")
 
     ax[0].set_ylabel("Probability of Lane Lead (Post Draft)")
     ax[0].set_xlabel("Probability of Lane Lead (Draft Agnostic)")
@@ -181,13 +181,13 @@ def lane_lead_correlations(games):
 
     return r2_b, r2_m, r2_t
 
-def plot_jojopyun_lane_leads_above_expected(match_data):
+def plot_jojopyun_lane_lead_above_expected(match_data):
     fig, ax = plt.subplots()
     match_data["mid_wins"] = match_data["mid_lead_at_15"] - match_data["post_draft_mid_lead_prob"]
     wins_above = match_data[["mid_wins"]].cumsum()
     ax.plot(range(len(wins_above)), wins_above)
 
-    ax.set_title("Jojopyun mid lane lead above expected")
+    ax.set_title("Jojopyun Mid Lane Lead Above Expected")
     ax.set_xlabel("2022 Season Games")
     ax.set_ylabel("Mid leads above expected")
     ax.grid()
