@@ -119,15 +119,15 @@ def calibration_plot(match_data):
     ax.set_ylabel("True Win Probability in each bin")
     ax.grid()
 
-def plot_cumulative_expected_wins_added_by_draft(match_data):
-    lec = match_data[match_data['league'] == 'LEC']
+def plot_cumulative_expected_wins_added_by_draft(match_data, league, teams):
+    lec = match_data[match_data['league'] == f'{league}']
     lec = lec[lec['date'] >= '2022-01-01'] # Most reason whole season
     lec['gamecount'] = lec.groupby('teamname')['draft_diff'].transform('cumcount')
     lec['wpa'] = lec.groupby('teamname')['draft_diff'].transform('cumsum')
     fig, ax = plt.subplots()
-    colour_dict = {'G2 Esports' :'black', 'Fnatic':'orange', 'Misfits Gaming': 'red'}
+    colour_dict = teams
     for team in np.unique(lec['teamname']):
-        if team in ['G2 Esports', 'Fnatic', 'Misfits Gaming']:
+        if team in teams.keys():
             ax.plot(lec[lec['teamname'] == team]['gamecount'],
                     lec[lec['teamname'] == team]['wpa'],
                     label=team, linewidth=2, color=colour_dict[team])
@@ -137,5 +137,5 @@ def plot_cumulative_expected_wins_added_by_draft(match_data):
                     label=team, color='Grey', alpha=0.4)
     ax.set_xlabel("Games played (2022 spring and summer split)")
     ax.set_ylabel("Cumulative expected wins")
-    ax.set_title("LoL European Championship Cumulative Expected Wins Added Through Draft")
     ax.grid()
+    return ax
